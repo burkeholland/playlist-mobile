@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8" />
+        <script src="javascripts/jquery.min.js"></script>
+        <script src="javascripts/kendo.all.min.js"></script>
+
+        <link href="styles/kendo.mobile.all.min.css" rel="stylesheet" />
+        <link href="styles/main.css" rel="stylesheet" />
+    </head>
+    <body>
+
+    <div data-role="splitview">
+
+        <div data-role="pane" id="side-pane" data-layout="side-layout">
+            <div data-role="view" data-title="Albums" id="side-default">
+               <ul data-role="listview" data-source="MYAPP.playlist.albums" data-template="albumsTemplate">
+               </ul>
+            </div>
+              
+              <script type="text/x-kendo-tmpl" id="albumsTemplate">
+                    <a class="left-album" href="\#album?albumId=#: id #" data-target="main-pane">
+                        <img class="left-album-art" width="64" src="#: art #" />
+                        <span class="left-album-name">#: name #</span>
+                    </a>
+              </script>
+              
+             <div data-role="layout" data-id="side-layout">
+                 <div data-role="header">
+                    <div data-role="navbar">
+                        <span data-role="view-title"></span>
+                    </div>
+                 </div>
+             </div>
+              
+        </div>
+        
+          <div data-role="pane" data-layout="main-default" id="main-pane">
+            <div data-role="view" data-title="Tracks" >
+                
+                <div data-role="popover" id="popover-add" data-popup='{"height": 140, "width": 350}'>
+                    <div data-role="view">
+                        Add New Stuff Here
+                    </div>
+                </div>
+                  
+                <div data-role="layout" data-id="main-default">
+                    <div data-role="header">
+                        <div data-role="navbar">
+                            <span data-role="view-title"></span>
+                             <a data-align="right" href="#popover-add" data-rel="popover-add" data-role="button">Open</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <h1>No Album Selected Yet!</h1>
+            </div>
+        
+            <script type="text/x-kendo-tmpl" id="albumTemplate">	
+		        <div class="right">
+                    <div class="right-album">
+        			    <img class="right-album-art" src="#: art #" class="album-art" width="200" height="200" />
+                        <div class="right-album-details">    
+                            <h1>#: artist.name #</h1>
+                            <h2>#: name #</h2>
+                        </div>
+                    </div>
+                    <div class="right-track-listing">
+                    <hr />    
+                    <h1>Tracks</h1>
+    				 # $.each(data.tracks, function() { #
+    				    <p>
+                             <a>#: this.name #</a>
+                        </p>
+                     # }); #
+                     </div>
+    			</div>
+        	</script>
+        
+        	<div data-role="view" data-title="Tracks" id="album" data-show="MYAPP.playlist.displayAlbum">
+            	
+                <div id="album-details">
+            		
+            	</div>
+            </div>
+        
+        </div>
+        
+        <script type="text/javascript">
+        
+        	'use strict';
+        
+        	var MYAPP = MYAPP || {};
+        
+        	MYAPP.playlist = (function($) {
+                
+                var root = "http://localhost:2111/";
+        
+        		var albums = new kendo.data.DataSource({
+        			transport: {
+        				read: {
+                            url: root + "albums",
+                            dataType: "JSON"
+        			    }
+                    },
+                    group: {
+                        field: "artist.name"
+                    }
+        		});
+        
+        		// create a new data source
+                var albumId = 0;
+        		var album = new kendo.data.DataSource({
+        			transport: {
+                        read: {
+            				url: function() {
+                                return root + "albums/" + albumId;
+                            }
+                        }
+        			},
+        			change: function(e) {
+        				// set the album details
+                        var template = kendo.template($("#albumTemplate").text());
+                    	$("#album-details").html(kendo.render(template, this.data()));
+        			}
+        		});
+        
+        		var pub = {};
+        
+        		pub.albums = albums;
+        		pub.album = album;
+        
+        		pub.displayAlbum = function(e) {
+        
+        			albumId = e.view.params.albumId;
+                    
+        			album.read();
+        
+        		}
+        
+        		return pub;
+        
+        	})(jQuery)
+        
+        	var app = new kendo.mobile.Application(document.body);
+        
+            
+        </script>
+      
+    </body>
+</html>
